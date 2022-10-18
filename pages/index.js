@@ -160,7 +160,7 @@ export default function Home() {
 
       <main className="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
         <h1 className="text-6xl font-bold text-blue-600 mb-6">
-          Donate to plant a tree 🌲
+          Donate in USDC to plant a tree 🌲
         </h1>
 
         {currentAccount ? (
