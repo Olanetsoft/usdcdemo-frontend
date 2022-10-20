@@ -26,6 +26,9 @@ export default function Home() {
   const [approving, setApproving] = useState(false);
   const [amount, setAmount] = useState("");
 
+  /**
+   * Check if the user wallet is connected
+   */
   const checkIfWalletIsConnected = async () => {
     try {
       const { ethereum } = window;
@@ -35,9 +38,14 @@ export default function Home() {
        */
       const accounts = await ethereum.request({ method: "eth_accounts" });
 
+      // Validate that we have an account
       if (accounts.length !== 0) {
         const account = accounts[0];
+
+        // Set the current account
         setCurrentAccount(account);
+
+        // Display a success message to the user that they are connected
         success("🦄 Wallet is Connected!");
       } else {
         warn("Make sure you have MetaMask Connected!");
@@ -54,14 +62,18 @@ export default function Home() {
     try {
       const { ethereum } = window;
 
+      // Check if MetaMask is installed
       if (!ethereum) {
         warn("Make sure you have MetaMask Connected!");
         return;
       }
 
+      // Request account access if needed
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
+
+      // Get the first account we get back
       setCurrentAccount(accounts[0]);
     } catch (error) {
       console.log(error);
@@ -73,9 +85,12 @@ export default function Home() {
     try {
       const { ethereum } = window;
 
+      // Check is user already connected a wallet
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
+
+        // Create a contract instance
         const fundContract = new ethers.Contract(
           contractAddress,
           contractABI,
@@ -85,20 +100,25 @@ export default function Home() {
         console.log("Connected to contract");
         console.log("amount: ", amount);
 
+        // Send the transaction
         const Txn = await fundContract.Fund(amount, {
           gasLimit: 300000,
         });
 
         console.log("Mining...", Txn.hash);
 
+        // Set the sending state to true
         setSending(true);
 
+        // Wait for the transaction to be mined
         await Txn.wait();
 
+        // Set the sending state to false
         setSending(false);
 
         console.log("Mined -- ", Txn.hash);
 
+        // Display a success message to the user
         success("🦄 Donation Sent Successfully!");
       } else {
         console.log("Ethereum object doesn't exist!");
@@ -108,14 +128,17 @@ export default function Home() {
     }
   };
 
+  // Check if the user has approved the contract to spend their USDC
   const Approve = async () => {
     try {
       const { ethereum } = window;
 
+      // Check if User already connected a wallet
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
 
+        // Create a contract object
         const usdcContract = new ethers.Contract(
           usdcContractAddress,
           usdcAbi,
@@ -128,14 +151,19 @@ export default function Home() {
           ethers.utils.parseUnits("1000", 6)
         );
 
+        // Set the approving state to true
         setApproving(true);
 
         // Wait for the transaction to be mined
         await usdcTxn.wait();
 
+        // Set the approving state to false
         setApproving(false);
+
+        // Set the isApproved state to true
         setIsApproved(true);
 
+        // Display a success message to the user
         success("🦄 USDC Approved Successfully!");
       }
     } catch (error) {
